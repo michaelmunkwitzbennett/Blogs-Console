@@ -23,6 +23,7 @@ namespace BlogsConsole
                     Console.WriteLine("1) Display all blogs");
                     Console.WriteLine("2) Add Blog");
                     Console.WriteLine("3) Create Post");
+                    Console.WriteLine("4) Display Posts");
                     Console.WriteLine("Enter q to quit");
                     choice = Console.ReadLine();
                     Console.Clear();
@@ -102,6 +103,51 @@ namespace BlogsConsole
                             else
                             {
                                 logger.Error("There are no Blogs saved with that Id");
+                            }
+                        }
+                        else
+                        {
+                            logger.Error("Invalid Blog Id");
+                        }
+                    }
+                    else if (choice == "4")
+                    {
+                        // Display Posts
+                        var db = new BloggingContext();
+                        var query = db.Blogs.OrderBy(b => b.BlogId);
+                        Console.WriteLine("Select the blog's posts to display:");
+                        Console.WriteLine("0) Posts from all blogs");
+                        foreach (var item in query)
+                        {
+                            Console.WriteLine($"{item.BlogId}) Posts from {item.Name}");
+                        }
+
+                        if (int.TryParse(Console.ReadLine(), out int BlogId))
+                        {
+                            IEnumerable<Post> Posts;
+                            if (BlogId != 0 && db.Blogs.Count(b => b.BlogId == BlogId) == 0)
+                            {
+                                logger.Error("There are no Blogs saved with that Id");
+                            }
+                            else
+                            {
+                                // display posts from all blogs
+                                Posts = db.Posts.OrderBy(p => p.Title);
+                                if (BlogId == 0)
+                                {
+                                    // display all posts from all blogs
+                                    Posts = db.Posts.OrderBy(p => p.Title);
+                                }
+                                else
+                                {
+                                    // display post from selected blog
+                                    Posts = db.Posts.Where(p => p.BlogId == BlogId).OrderBy(p => p.Title);
+                                }
+                                Console.WriteLine($"{Posts.Count()} post(s) returned");
+                                foreach (var item in Posts)
+                                {
+                                    Console.WriteLine($"Blog: {item.Blog.Name}\nTitle: {item.Title}\nContent: {item.Content}\n");
+                                }
                             }
                         }
                         else
